@@ -9,6 +9,8 @@ export class IssueMaster{
   public projectModule: string;
   public problemStatement: string;
   public description: string;
+  public mobileNumber: string;
+
 
   setName(name: string) {
     this.name = name;
@@ -16,6 +18,15 @@ export class IssueMaster{
 
   getName(): string {
     return this.name;
+
+  }
+
+  setMobileNumber(mobileNumber: string) {
+    this.mobileNumber = mobileNumber;
+  }
+
+  getMobileNumber(): string {
+    return this.mobileNumber;
 
   }
 

@@ -58,6 +58,8 @@ export class AddIssueComponent implements OnInit {
 
   isProcessing :boolean;
 
+  mobileNumber:any;
+
   ngOnInit() {
     this.issueMasterForm = new FormGroup({
       projectName: new FormControl('', Validators.required),
@@ -73,6 +75,7 @@ export class AddIssueComponent implements OnInit {
     this.username = this.loggedInUser.getUsername();
     this.name = this.loggedInUser.getName();
     this.locationCode = this.loggedInUser.getLocationCode();
+    this.mobileNumber =this.loggedInUser.getMobileNo();
     this.locationName = this.loggedInUser.getLocationShortName();
     this.officeType = this.loggedInUser.getOfficeType();
     console.log(this.loggedInUser);
@@ -196,6 +199,7 @@ export class AddIssueComponent implements OnInit {
     this.issueMasterModel = new IssueMaster();
     this.issueMasterModel.setUsername(this.username);
     this.issueMasterModel.setName(this.name);
+    this.issueMasterModel.setMobileNumber(this.mobileNumber);
     this.issueMasterModel.setLocationCode(this.locationCode);
     this.issueMasterModel.setLocationName(this.locationName);
     this.issueMasterModel.setOfficeType(this.officeType);
