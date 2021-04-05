@@ -30,6 +30,15 @@ export class UserService {
       (response: HttpResponse<any>) => {
         return response;
       }));
+      
+  }
+
+  getUserByLocationCodeAndRole(locationCode: string, role: any) {
+      return this.http.get(this.contextPath + '/users-detail/location-user/location-code/' + locationCode + '/role/' + role, { observe: 'response' }).pipe(map(
+      (response: HttpResponse<any>) => {
+        return response;
+      }));
+      
   }
 
 

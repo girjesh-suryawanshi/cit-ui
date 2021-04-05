@@ -6,6 +6,7 @@ import { DashboardService } from 'src/app/services/dashboard/dashboard.service';
 import { IssueMasterService } from 'src/app/services/project/issue-master.service';
 import { IssueStatusService } from 'src/app/services/project/issue-status.service';
 import { RequestInformationService } from 'src/app/services/project/request-information.service';
+import { UserService } from 'src/app/services/users/user.service';
 import { GlobalConstants } from 'src/app/utility/global.constants';
 import { GobalutilityService } from 'src/app/utility/gobalutility.service';
 
@@ -19,7 +20,7 @@ export class ToDoIssueComponent implements OnInit {
   loggedInUser: User;
   username: string;
   locationCode: string;
-  assignedProblemStatement: any =[];
+  assignedProblemStatement: any = [];
   files: any;
   isView: boolean;
   viewIssue: any;
@@ -37,19 +38,22 @@ export class ToDoIssueComponent implements OnInit {
   isProcessing: boolean;
   officeType: string;
   statusList: any;
-  requestInfoList: any =[];
+  requestInfoList: any = [];
   forwardUser: any;
   dtOptions: any = {};
   uploadFiles: File[] = [];
-  isResolveIssueFile :boolean;
+  isResolveIssueFile: boolean;
   resolveIssuefiles: any;
-  isReopenIssueFile :boolean;
+  isReopenIssueFile: boolean;
   reopenIssuefiles: any;
-  
+  role: string;
+  users: any;
+
 
   constructor(private dashboardService: DashboardService,
-    private issueMasterService:IssueMasterService,private issueStatusService: IssueStatusService,
-     private authorizationService: AuthorizationService, private requestInformationService: RequestInformationService,
+    private issueMasterService: IssueMasterService, private issueStatusService: IssueStatusService,
+    private authorizationService: AuthorizationService, private userService: UserService,
+    private requestInformationService: RequestInformationService,
     private globalutilityService: GobalutilityService) { }
 
   ngOnInit(): void {
@@ -62,12 +66,13 @@ export class ToDoIssueComponent implements OnInit {
 
     this.requestForwardForm = new FormGroup({
       remark: new FormControl('', Validators.required),
+      user: new FormControl('', Validators.required)
 
     });
 
     this.resolveForm = new FormGroup({
       comments: new FormControl('', Validators.required),
-      isAttachment :new FormControl(false)
+      isAttachment: new FormControl(false)
     });
 
     this.rejectForm = new FormGroup({
@@ -79,6 +84,7 @@ export class ToDoIssueComponent implements OnInit {
     this.loggedInUser = this.authorizationService.getLoggedInUser();
     this.username = this.loggedInUser.getUsername();
     this.locationCode = this.loggedInUser.getLocationCode();
+    this.role = this.loggedInUser.getRole();
     this.name = this.loggedInUser.getName();
     this.officeType = this.loggedInUser.getOfficeType();
     this.getAllAssignedProblemStatement(this.username);
@@ -86,7 +92,7 @@ export class ToDoIssueComponent implements OnInit {
     this.dtOptions = {
       pagingType: 'full_numbers',
       pageLength: 10,
-    lengthMenu : [10, 25, 50],
+      lengthMenu: [10, 25, 50],
       processing: true
     };
 
@@ -96,18 +102,18 @@ export class ToDoIssueComponent implements OnInit {
 
     this.dashboardService.getAllAssignedProblem(username).subscribe(success => {
 
-      if(success.status === 200){
+      if (success.status === 200) {
         console.log("Inside success assign problem found successfully");
-        
+
         this.assignedProblemStatement = success.body;
       }
-      else if(success.status === 204){
+      else if (success.status === 204) {
         console.log("No content found");
-        
-        this.assignedProblemStatement =[];
+
+        this.assignedProblemStatement = [];
       }
-    
-       }, error => {
+
+    }, error => {
 
       console.log("Inside error while getting assign problem");
 
@@ -115,23 +121,23 @@ export class ToDoIssueComponent implements OnInit {
 
   }
 
-  viewResolveIssueFileClicked(file:any){
+  viewResolveIssueFileClicked(file: any) {
     this.isResolveIssueFile = true;
     this.issueMasterService.getResolveIssueFileByTokenNumber(file.tokenNumber).subscribe(success => {
-    if(success.status === 200){      
-      console.log("Resolve Issue File Found Successfully By TokenNumber");
-      this.resolveIssuefiles = success.body;
-      console.log(this.resolveIssuefiles);      
-    }else if(success.status === 204){
-      console.log("No File Found While Getting  File By TokenNumber");
-    } 
+      if (success.status === 200) {
+        console.log("Resolve Issue File Found Successfully By TokenNumber");
+        this.resolveIssuefiles = success.body;
+        console.log(this.resolveIssuefiles);
+      } else if (success.status === 204) {
+        console.log("No File Found While Getting  File By TokenNumber");
+      }
     }, error => {
       console.log("Getting Error while getting File By TokenNumber");
       console.log(error);
     })
   }
 
-  onClickViewResolveIssueFile(file:any){
+  onClickViewResolveIssueFile(file: any) {
     console.log("onClickViewResolveIssueFile");
     this.issueMasterService.downloadFileByTokenNumberAndFileName(file.tokenNumber, file.name, GlobalConstants.FALSE).subscribe(success => {
       this.saveFile(success, file.originalName)
@@ -140,26 +146,25 @@ export class ToDoIssueComponent implements OnInit {
     })
   }
 
-  viewReopenFileClicked(file:any){
+  viewReopenFileClicked(file: any) {
     this.isReopenIssueFile = true;
     console.log("reopen file clicked");
     console.log(file);
     this.issueMasterService.getReopenIssueFileByTokenNumber(file.tokenNumber).subscribe(success => {
-      if(success.status === 200){      
+      if (success.status === 200) {
         console.log("Resolve Issue File Found Successfully By TokenNumber");
         this.reopenIssuefiles = success.body;
-        console.log(this.resolveIssuefiles);      
-      }else if(success.status === 204){
+        console.log(this.resolveIssuefiles);
+      } else if (success.status === 204) {
         console.log("No File Found While Getting  File By TokenNumber");
-      } 
-      }, error => {
-        console.log("Getting Error while getting File By TokenNumber");
-        console.log(error);
-      })
-    }
+      }
+    }, error => {
+      console.log("Getting Error while getting File By TokenNumber");
+      console.log(error);
+    })
+  }
 
-  onClickDownloadReopenIssueFile(file:any)
-  {
+  onClickDownloadReopenIssueFile(file: any) {
     console.log("onClickViewResolveIssueFile");
     this.issueMasterService.downloadReopenIssueFileByTokenNumberAndFileName(file.tokenNumber, file.name, GlobalConstants.FALSE).subscribe(success => {
       this.saveFile(success, file.originalName)
@@ -184,14 +189,14 @@ export class ToDoIssueComponent implements OnInit {
     this.isView = true;
     this.getFileByTokenNumber(ps.tokenNumber);
     this.getIssueStatusByTokenNumber(ps.tokenNumber);
-    this.getByUsernameAndTokenNumber(this.username,ps.tokenNumber);
+    this.getByUsernameAndTokenNumber(this.username, ps.tokenNumber);
     this.viewResolveIssueFileClicked(ps);
     this.viewReopenFileClicked(ps);
     console.log("View Clicked");
     console.log(ps);
 
   }
- 
+
   getIssueStatusByTokenNumber(tokenNumber: any) {
     this.issueStatusService.getRequestInformationByTokenNumber(tokenNumber).subscribe(success => {
 
@@ -209,8 +214,6 @@ export class ToDoIssueComponent implements OnInit {
     })
   }
 
-
-
   public onClickBack() {
     this.isView = false;
     this.isForward = false;
@@ -226,7 +229,7 @@ export class ToDoIssueComponent implements OnInit {
 
   onResolveSubmit() {
     this.isProcessing = true;
-    this.dashboardService.resolveIssueByTokenNumber(this.viewIssue.tokenNumber, this.resolveForm.value.comments,this.uploadFiles).subscribe(success => {
+    this.dashboardService.resolveIssueByTokenNumber(this.viewIssue.tokenNumber, this.resolveForm.value.comments, this.uploadFiles).subscribe(success => {
       if (success.status === 201) {
         this.globalutilityService.successAlertMessage("Issue resolve successfully");
         this.isProcessing = false;
@@ -254,6 +257,7 @@ export class ToDoIssueComponent implements OnInit {
     this.isRequestInfo = false;
     this.isResolve = false;
   }
+
   onClickReject(ps: any) {
     this.isForward = false;
     this.isReject = true;
@@ -276,7 +280,7 @@ export class ToDoIssueComponent implements OnInit {
         this.onClickResolveBack();
         this.isView = false;
       }
-      
+
     }, error => {
       if (error.status === 417) {
         this.isProcessing = false;
@@ -286,7 +290,6 @@ export class ToDoIssueComponent implements OnInit {
     })
 
   }
-
 
   onClickRejectBack() {
     this.isForward = false;
@@ -301,20 +304,27 @@ export class ToDoIssueComponent implements OnInit {
     this.isReject = false;
     this.isRequestInfo = false;
     this.isResolve = false;
-    console.log("forward click");
+    console.log("forward click print log");
     console.log(viewIssue);
-    this.getProjectProblemUserMapping(this.locationCode,viewIssue.projectName,viewIssue.projectModule,viewIssue.projectProblemStatement);
+    if(this.role === 'ERP-ADMIN'){
+      console.log("If part called of ERP");
+      
+      this.getUserByLocationCodeAndRole();
+    }else{
+      console.log("Else part Called");      
+      this.getProjectProblemUserMapping(this.locationCode, viewIssue.projectName, viewIssue.projectModule, viewIssue.projectProblemStatement);
+    }
   }
 
   getProjectProblemUserMapping(locationCode: string, projectName: any, projectModule: any, projectProblemStatement: any) {
-    this.dashboardService.getProjectProblemUserMapping(locationCode,projectName,projectModule,projectProblemStatement).subscribe(success=>{
-      if(success.status === 200){
+    this.dashboardService.getProjectProblemUserMapping(locationCode, projectName, projectModule, projectProblemStatement).subscribe(success => {
+      if (success.status === 200) {
         this.forwardUser = success.body;
-      }      
+      }
 
-    },error=>{
+    }, error => {
       console.log("inside error");
-      
+
     })
   }
 
@@ -344,7 +354,6 @@ export class ToDoIssueComponent implements OnInit {
     })
   }
 
-
   public onClickRequestInfoBack() {
     this.isRequestInfo = false;
     this.reset();
@@ -352,7 +361,8 @@ export class ToDoIssueComponent implements OnInit {
 
   onForwardSubmit() {
     this.prepareFarwardIssueObject();
-    this.dashboardService.forwardIssueToParent(this.forwardIssue).subscribe(success => {
+  
+     this.dashboardService.forwardIssueToParent(this.forwardIssue).subscribe(success => {
       if (success.status === 201) {
         this.globalutilityService.successAlertMessage("Issue Forwarded Successfully")
         this.isForward = false;
@@ -372,8 +382,51 @@ export class ToDoIssueComponent implements OnInit {
   }
 
   private prepareFarwardIssueObject() {
-    this.forwardIssue = this.viewIssue;
-    this.forwardIssue.remark = this.requestForwardForm.value.remark;
+    if(this.role==='ERP-ADMIN'){
+      this.forwardIssue.assignUsername = this.requestForwardForm.value.user.username;
+      this.forwardIssue.assignName = this.requestForwardForm.value.user.name;
+      this.forwardIssue.remark = this.requestForwardForm.value.remark;
+      console.log("If ERP-admin true object is"); 
+      console.log(this.forwardIssue); 
+      this.dashboardService.forwardIssueDirectly(this.forwardIssue).subscribe(success => {
+        if (success.status === 201) {
+          this.globalutilityService.successAlertMessage("Issue Forwarded Successfully")
+          this.isForward = false;
+          this.getAllAssignedProblemStatement(this.username);
+          this.resetForwardForm();
+          this.onClickResolveBack();
+          this.isView = false;
+        }
+      }, error => {
+        if (error.status === 417) {
+          this.globalutilityService.errorAlertMessage("Unable to forward issue")
+          this.isForward = false;
+          this.resetForwardForm()
+        }
+      })
+
+    }else{
+      console.log("If ERP-admin false object is");         
+     this.forwardIssue = this.viewIssue;
+     this.forwardIssue.remark = this.requestForwardForm.value.remark;
+     console.log(this.forwardIssue);
+     this.dashboardService.forwardIssueToParent(this.forwardIssue).subscribe(success => {
+      if (success.status === 201) {
+        this.globalutilityService.successAlertMessage("Issue Forwarded Successfully")
+        this.isForward = false;
+        this.getAllAssignedProblemStatement(this.username);
+        this.resetForwardForm();
+        this.onClickResolveBack();
+        this.isView = false;
+      }
+    }, error => {
+      if (error.status === 417) {
+        this.globalutilityService.errorAlertMessage("Unable to forward issue")
+        this.isForward = false;
+        this.resetForwardForm()
+      }
+    })
+    }
 
   }
 
@@ -393,9 +446,6 @@ export class ToDoIssueComponent implements OnInit {
     console.log("Request info object");
     console.log(this.requestInfoForm);
     console.log(this.requestInfoForm.value);
-
-    
-    
     this.requestInformationService.requestInformationToOrigin(this.requestInfoObject).subscribe(success => {
       console.log("Inside success");
       console.log(success);
@@ -404,7 +454,7 @@ export class ToDoIssueComponent implements OnInit {
         this.reset();
         this.isRequestInfo = false;
         this.isView = false;
-        
+
       }
     },
       error => {
@@ -423,7 +473,7 @@ export class ToDoIssueComponent implements OnInit {
     this.requestInfoObject.requestedUsername = this.username;
     this.requestInfoObject.requestedName = this.name;
     this.requestInfoObject.requestMessage = this.requestInfoForm.value.remark;
-    
+
   }
 
 
@@ -444,7 +494,7 @@ export class ToDoIssueComponent implements OnInit {
     this.uploadFiles = [];
     this.resolveForm.patchValue({
       comments: '',
-      isAttachment:''
+      isAttachment: ''
     });
   }
 
@@ -463,10 +513,23 @@ export class ToDoIssueComponent implements OnInit {
       this.handleError(error);
     })
   }
- 
-  
-  getByUsernameAndTokenNumber(username: any,tokenNumber :any) {
-    this.requestInformationService.getByUsernameAndTokenNumber(username,tokenNumber).subscribe(success => {
+
+  private getUserByLocationCodeAndRole() {
+    console.log('Getting USers');
+    this.userService.getUserByLocationCodeAndRole(this.locationCode, 'ERP-ADMIN').subscribe(success => {
+      console.log(success.body);
+      this.users = success.body;
+    }, () => {
+
+      // this.project=succes.body;
+
+    });
+
+  }
+
+
+  getByUsernameAndTokenNumber(username: any, tokenNumber: any) {
+    this.requestInformationService.getByUsernameAndTokenNumber(username, tokenNumber).subscribe(success => {
 
       console.log("Getting Information List As view Clicked");
 
@@ -474,11 +537,11 @@ export class ToDoIssueComponent implements OnInit {
 
       console.log(success.body);
 
-      if(success.status === 200){
+      if (success.status === 200) {
         this.requestInfoList = success.body;
 
-      }else if(success.status === 204){
-        this.requestInfoList =[];
+      } else if (success.status === 204) {
+        this.requestInfoList = [];
       }
 
     }, error => {
@@ -488,7 +551,7 @@ export class ToDoIssueComponent implements OnInit {
 
   }
 
-  onFileChange(event){
+  onFileChange(event) {
 
     this.uploadFiles = [];
 
@@ -496,24 +559,23 @@ export class ToDoIssueComponent implements OnInit {
 
     console.log(size)
 
-    if (size < 1000000) 
-    { 
-     if(event.target.files.length <=2){
-           
-      for (var i = 0; i < event.target.files.length; i++) {
-        this.uploadFiles.push(event.target.files[i]);
-      }
-    } else{
+    if (size < 1000000) {
+      if (event.target.files.length <= 2) {
+
+        for (var i = 0; i < event.target.files.length; i++) {
+          this.uploadFiles.push(event.target.files[i]);
+        }
+      } else {
         this.globalutilityService.errorAlertMessage("Maximum 2 File Allow to upload");
       }
 
-    }else{
-    this.globalutilityService.errorAlertMessage("File Size greater 1 Mb");
+    } else {
+      this.globalutilityService.errorAlertMessage("File Size greater 1 Mb");
     }
   }
 
-  
-  isAttachmentClicked(){
+
+  isAttachmentClicked() {
     this.resolveForm.get('isAttachment').valueChanges.subscribe(checked => {
       if (checked) {
         const validators = [Validators.required];
@@ -535,7 +597,6 @@ export class ToDoIssueComponent implements OnInit {
     }
   }
 
-   
   resetFile() {
     this.resolveForm.patchValue({
       attachment: '',
@@ -562,7 +623,4 @@ export class ToDoIssueComponent implements OnInit {
     this.globalutilityService.parseStringFromBlob(error.error);
     this.globalutilityService.errorAlertMessage("Unable to download file.");
   }
-
-
-
 }

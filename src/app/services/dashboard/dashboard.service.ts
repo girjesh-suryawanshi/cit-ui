@@ -99,6 +99,14 @@ export class DashboardService {
     }))
 }
 
+forwardIssueDirectly(forwardIssue: any) {
+
+  return this.http.post(this.contextPath + 'project-problem-assignment/direct', forwardIssue, { observe: 'response' }).pipe(
+    map((response: HttpResponse<any>) => {
+      return response;
+    }))
+}
+
 getUserByTokenNumber(tokenNumber: any) {
   console.log("Inside getting users");
   return this.http.get(this.contextPath + '/issue-status/token-number/' + tokenNumber, { observe: 'response' }).pipe(map(

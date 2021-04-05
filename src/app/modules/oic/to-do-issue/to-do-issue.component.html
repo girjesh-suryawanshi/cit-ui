@@ -272,7 +272,7 @@
       (click)="onClickReject(viewIssue)">Reject</button>
   </div>
   <div>
-    <button  *ngIf="locationCode!=='34420124'" class="btn btn-primary btn-sm mr-4" [disabled]="isDisable"
+    <button  *ngIf="locationCode!=='34420124' || role==='ERP-ADMIN'" class="btn btn-primary btn-sm mr-4" [disabled]="isDisable"
       (click)="onClickforward(viewIssue)">Forward</button>
   </div>
   <div>
@@ -292,6 +292,16 @@
           <tr *ngIf="forwardUser != null">
             <th>Forward To</th>
             <td><small>{{forwardUser.username}} ({{forwardUser.name}})</small></td>
+          </tr>
+
+          <tr *ngIf="role==='ERP-ADMIN'">
+            <th>Forward To</th>
+            <td><select class="form-control" name="user" formControlName="user" required>
+              <option value="" disabled>Select User</option>
+              <option *ngFor="let user of users" [ngValue]="user" class="form-control form-control-sm text-center">
+                {{user.username}}&nbsp;({{user.name}})
+              </option>
+            </select></td>
           </tr>
           <tr>
             <th>Token Number</th>
