@@ -30,7 +30,7 @@ export class ToDoIssueComponent implements OnInit {
   isResolve: boolean;
   isReject: boolean;
   name: string;
-  forwardIssue: any;
+  forwardIssue: any = {};
   requestInfoUser: any;
   requestInfoForm; rejectForm; resolveForm: FormGroup;
   requestForwardForm: FormGroup;
@@ -217,7 +217,9 @@ export class ToDoIssueComponent implements OnInit {
   public onClickBack() {
     this.isView = false;
     this.isForward = false;
-
+    this.resetForwardForm();
+    this.resetRejectForm();
+    this.resetResolveForm();
   }
 
   onClickResolve(ps: any) {
@@ -300,18 +302,18 @@ export class ToDoIssueComponent implements OnInit {
   }
 
   onClickforward(viewIssue: any) {
+    if (this.role !== 'ERP-ADMIN') {
+      this.requestForwardForm.removeControl('user');
+    }
     this.isForward = true;
     this.isReject = false;
     this.isRequestInfo = false;
     this.isResolve = false;
-    console.log("forward click print log");
-    console.log(viewIssue);
-    if(this.role === 'ERP-ADMIN'){
+    if (this.role === 'ERP-ADMIN') {
       console.log("If part called of ERP");
-      
       this.getUserByLocationCodeAndRole();
-    }else{
-      console.log("Else part Called");      
+    } else {
+      console.log("Else part Called");
       this.getProjectProblemUserMapping(this.locationCode, viewIssue.projectName, viewIssue.projectModule, viewIssue.projectProblemStatement);
     }
   }
@@ -333,6 +335,7 @@ export class ToDoIssueComponent implements OnInit {
     this.isReject = false;
     this.isRequestInfo = false;
     this.isResolve = false;
+    this.resetForwardForm();
   }
 
   onClickRequestInfo(viewIssue: any) {
@@ -361,33 +364,19 @@ export class ToDoIssueComponent implements OnInit {
 
   onForwardSubmit() {
     this.prepareFarwardIssueObject();
-  
-     this.dashboardService.forwardIssueToParent(this.forwardIssue).subscribe(success => {
-      if (success.status === 201) {
-        this.globalutilityService.successAlertMessage("Issue Forwarded Successfully")
-        this.isForward = false;
-        this.getAllAssignedProblemStatement(this.username);
-        this.resetForwardForm();
-        this.onClickResolveBack();
-        this.isView = false;
-      }
-    }, error => {
-      if (error.status === 417) {
-        this.globalutilityService.errorAlertMessage("Unable to forward issue")
-        this.isForward = false;
-        this.resetForwardForm()
-      }
-    })
-
   }
 
   private prepareFarwardIssueObject() {
-    if(this.role==='ERP-ADMIN'){
+    if (this.role === 'ERP-ADMIN') {
+      console.log("Role is ERP-ADMIN preparring object");
+      console.log(this.requestForwardForm.value);
+
+      this.forwardIssue = this.viewIssue;
       this.forwardIssue.assignUsername = this.requestForwardForm.value.user.username;
       this.forwardIssue.assignName = this.requestForwardForm.value.user.name;
       this.forwardIssue.remark = this.requestForwardForm.value.remark;
-      console.log("If ERP-admin true object is"); 
-      console.log(this.forwardIssue); 
+      console.log("If ERP-admin true object is");
+      console.log(this.forwardIssue);
       this.dashboardService.forwardIssueDirectly(this.forwardIssue).subscribe(success => {
         if (success.status === 201) {
           this.globalutilityService.successAlertMessage("Issue Forwarded Successfully")
@@ -405,27 +394,28 @@ export class ToDoIssueComponent implements OnInit {
         }
       })
 
-    }else{
-      console.log("If ERP-admin false object is");         
-     this.forwardIssue = this.viewIssue;
-     this.forwardIssue.remark = this.requestForwardForm.value.remark;
-     console.log(this.forwardIssue);
-     this.dashboardService.forwardIssueToParent(this.forwardIssue).subscribe(success => {
-      if (success.status === 201) {
-        this.globalutilityService.successAlertMessage("Issue Forwarded Successfully")
-        this.isForward = false;
-        this.getAllAssignedProblemStatement(this.username);
-        this.resetForwardForm();
-        this.onClickResolveBack();
-        this.isView = false;
-      }
-    }, error => {
-      if (error.status === 417) {
-        this.globalutilityService.errorAlertMessage("Unable to forward issue")
-        this.isForward = false;
-        this.resetForwardForm()
-      }
-    })
+    } else {
+      console.log("Role is not ERP-ADMIN preparring object");
+      console.log(this.requestForwardForm.value);
+      this.forwardIssue = this.viewIssue;
+      this.forwardIssue.remark = this.requestForwardForm.value.remark;
+      console.log(this.forwardIssue);
+      this.dashboardService.forwardIssueToParent(this.forwardIssue).subscribe(success => {
+        if (success.status === 201) {
+          this.globalutilityService.successAlertMessage("Issue Forwarded Successfully")
+          this.isForward = false;
+          this.getAllAssignedProblemStatement(this.username);
+          this.resetForwardForm();
+          this.onClickResolveBack();
+          this.isView = false;
+        }
+      }, error => {
+        if (error.status === 417) {
+          this.globalutilityService.errorAlertMessage("Unable to forward issue")
+          this.isForward = false;
+          this.resetForwardForm()
+        }
+      })
     }
 
   }
@@ -486,7 +476,9 @@ export class ToDoIssueComponent implements OnInit {
 
   resetForwardForm() {
     this.requestForwardForm.patchValue({
-      remark: ''
+      remark: '',
+      user: ''
+
     });
   }
 
