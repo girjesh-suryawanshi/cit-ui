@@ -294,7 +294,7 @@
             <td><small>{{forwardUser.username}} ({{forwardUser.name}})</small></td>
           </tr>
 
-          <tr *ngIf="role==='ERP-ADMIN'">
+          <tr *ngIf="role===ERP_ADMIN">
             <th>Forward To</th>
             <td><select class="form-control" name="user" formControlName="user" required>
               <option value="" disabled>Select User</option>

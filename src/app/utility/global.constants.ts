@@ -13,5 +13,7 @@ export class GlobalConstants {
     public static readonly FILE_FORMAT_TEXT: string = "text";
     public static readonly FILE_FORMAT_HTML: string = "html";
     public static readonly FALSE : boolean = false;
+    public static readonly ROLE_OIC : string = "oic";
+    public static readonly ROLE_ERP_ADMIN : string = "ERP-ADMIN";
     
 }

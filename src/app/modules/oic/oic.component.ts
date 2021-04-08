@@ -1,6 +1,7 @@
 import { Component,OnInit} from '@angular/core';
 import { User } from 'src/app/models/user.model';
 import { AuthorizationService } from 'src/app/services/authorization-service/authorization.service';
+import { GlobalConstants } from 'src/app/utility/global.constants';
 
 @Component({
   selector: 'app-oic',
@@ -14,6 +15,7 @@ export class OicComponent implements OnInit {
   role:any;
 
   officeType:any;
+  ROLE_OIC: string;
  
 
   constructor(private authorizationService: AuthorizationService) { }
@@ -22,6 +24,7 @@ export class OicComponent implements OnInit {
       this.loggedInUser = this.authorizationService.getLoggedInUser();
       this.role = this.loggedInUser.getRole();
       this.officeType =this.authorizationService.getLoggedInUser().getOfficeType();
+      this.ROLE_OIC=GlobalConstants.ROLE_OIC;
   }
 
   logoutClicked() {

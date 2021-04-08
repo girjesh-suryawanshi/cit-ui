@@ -48,6 +48,7 @@ export class ToDoIssueComponent implements OnInit {
   reopenIssuefiles: any;
   role: string;
   users: any;
+  ERP_ADMIN: string;
 
 
   constructor(private dashboardService: DashboardService,
@@ -88,6 +89,7 @@ export class ToDoIssueComponent implements OnInit {
     this.name = this.loggedInUser.getName();
     this.officeType = this.loggedInUser.getOfficeType();
     this.getAllAssignedProblemStatement(this.username);
+    this.ERP_ADMIN = GlobalConstants.ROLE_ERP_ADMIN
 
     this.dtOptions = {
       pagingType: 'full_numbers',
@@ -109,7 +111,7 @@ export class ToDoIssueComponent implements OnInit {
       }
       else if (success.status === 204) {
         console.log("No content found");
-
+        
         this.assignedProblemStatement = [];
       }
 
@@ -302,14 +304,14 @@ export class ToDoIssueComponent implements OnInit {
   }
 
   onClickforward(viewIssue: any) {
-    if (this.role !== 'ERP-ADMIN') {
+    if (this.role !== GlobalConstants.ROLE_ERP_ADMIN) {
       this.requestForwardForm.removeControl('user');
     }
     this.isForward = true;
     this.isReject = false;
     this.isRequestInfo = false;
     this.isResolve = false;
-    if (this.role === 'ERP-ADMIN') {
+    if (this.role === GlobalConstants.ROLE_ERP_ADMIN) {
       console.log("If part called of ERP");
       this.getUserByLocationCodeAndRole();
     } else {
